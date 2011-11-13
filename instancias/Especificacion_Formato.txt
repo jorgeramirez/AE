@@ -1,0 +1,16 @@
+TSP:
+Archivos: KROAB100.TSP.TXT y kroac100.tsp.txt
+Formato:- Primera Linea, cantidad de ciudades
+ - Segunda Linea, cantidad de objetivos (=cantidad de matrices)
+ - matriz de adyacencia para el objetivo 1
+ - una línea en blanco
+ - matriz de adyacencia para el objetivo 2
+
+QAP:
+Archivos: qapUni.75.0.1.qap.txt y qapUni.75.p75.1.qap.txt
+Formato:- Primera Linea, cantidad de localidades (= cantidad de edificios)
+ - matriz de adyacencia para el objetivo 1 (flujo 1 e/ edificios)
+ - una línea en blanco
+ - matriz de adyacencia para el objetivo 2 (flujo 2 e/ edificios)
+ - una línea en blanco
+ - matriz de adyacencia para las distancias (distancia e/ localidades)
