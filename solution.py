@@ -38,7 +38,7 @@ class ParetoSet:
 	def __init__(self, solutions):
 		"""
 		@param solutions: lista de soluciones del frente pareto. Si no
-						  se conoce previamente, utilizar []
+						  se conoce previamente, utilizar Solution([], objs)
 		"""
 		self.solutions = solutions
 		
