@@ -13,13 +13,14 @@ class Solution:
 		self.solution = solution
 		self.objectives = objectives
 		
-	def evaluate():
+	def evaluate(self):
 		"""
 		@return: una lista de las evaluaciones de la solución para cada
 				 función objetivo
 		"""
 		return [o.evaluate(self) for o in self.objectives]
-	def dominates(other_solution):
+		
+	def dominates(self, other_solution):
 		""" 
 		@param other_solution: otra solución a comparar.
 		"""
@@ -42,7 +43,7 @@ class ParetoSet:
 		"""
 		self.solutions = solutions
 		
-	def update(candidates):
+	def update(self, candidates):
 		"""
 		@param solutions: lista de soluciones para actualizar el frente
 						  pareto
@@ -53,7 +54,7 @@ class ParetoSet:
 				solutions = [s for s in solutions and s not in to_delete]
 				solutions.append(candidate)
 
-	def domination_check(candidate):
+	def domination_check(self, candidate):
 		"""
 		@param candidate: solución candidata que se analiza
 		
@@ -64,7 +65,7 @@ class ParetoSet:
 		for solution in solutions:
 			if solution.dominates(candidate): #La solución del CP domina al candidato
 				return True,[] #El candidato no se agrega al CP.
-			else
+			else:
 				if candidate.dominates(solution): #La solución del CP es dominada por el candidato
 					to_delete.append(solution) #Se agrega la solución a una lista para eliminar
 					
