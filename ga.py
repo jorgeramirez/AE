@@ -1,8 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import random
+import random, sys, math
 from solution import Solution
+
+class GaSolution(Solution):
+    def __init__(self, solution, objectives):
+        Solution.__init__(self, solution, objectives)
+        self.fitness = sys.maxint
+    
+    def distance(self, other):
+        """
+        Calcula la distancia Euclidiana entre dos individuos
+        
+        @param other: el otro individuo
+        """
+        me_objs = self.evaluate()
+        other_objs = other.evaluate()
+        dist = 0.0
+        for v1, v2 in zip(me_objs, other_objs):
+            dist += math.pow(v1-v2, 2)
+        return math.sqrt(dist)
+
 
 class GeneticOperators:
     
@@ -14,7 +33,7 @@ class GeneticOperators:
     
 
 class TspGeneticOperators(GeneticOperators):
-    
+
     def crossover(self, sol_a, sol_b):
         """
         Crossover de las soluciones dadas como parametros.
@@ -64,7 +83,7 @@ class TspGeneticOperators(GeneticOperators):
         
 
 class QapGeneticOperators(GeneticOperators):
-    
+
     def crossover(self, sol_a, sol_b):
         """
         Partially-Mapped Crossover o PMX Crossover

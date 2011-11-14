@@ -33,6 +33,7 @@ class Solution:
             else:
                 if obj.evaluate(self.solution) <= obj.evaluate(other_solution):
                     band = True
+        return band
     
     def __eq__(self, other):
         """
