@@ -33,6 +33,13 @@ class Solution:
             else:
                 if obj.evaluate(self.solution) <= obj.evaluate(other_solution):
                     band = True
+    
+    def __eq__(self, other):
+        """
+        operador == para objetos Solution
+        @param other: la otra solucion a comparar
+        """
+        return self.solution == other.solution
 
 
 class ParetoSet:

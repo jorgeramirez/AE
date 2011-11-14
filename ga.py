@@ -28,6 +28,7 @@ class TspGeneticOperators(GeneticOperators):
         
         @param sol_a: Primera solucion
         @param sol_b: Segunda solucion
+        @return: lista de hijos
         """    
         child = [-1 for n in xrange(len(sol_a.solution))]
         k = 0
@@ -44,7 +45,7 @@ class TspGeneticOperators(GeneticOperators):
             if child[i] < 0:
                 child[i] = s
         
-        return Solution(child, sol_a.objectives)
+        return [Solution(child, sol_a.objectives)]
     
     def mutation(self, sol):
         """
@@ -66,33 +67,40 @@ class QapGeneticOperators(GeneticOperators):
     
     def crossover(self, sol_a, sol_b):
         """
-        Crossover de las soluciones dadas como parametros.
-        Elige tres posiciones al azar y luego genera el primer hijo
-        en base a sol_a, pero con los elementos de sol_b en las posiciones
-        sorteadas. De manera análoga para el segundo hijo.
-        Luego se retorna el mejor de los dos hijos.
+        Partially-Mapped Crossover o PMX Crossover
         
         @param sol_a: Primera solucion
         @param sol_b: Segunda solucion
+        @return: lista de hijos
         """     
-        pos, child_1, child_2 = [], [], []
+        if sol_a == sol_b:
+            return []
         n = len(sol_a.solution) - 1
-        child_1.extend(sol_a.solution)
-        child_2.extend(sol_b.solution)
-        for i in xrange(3):
-            while True:
-                j = random.randint(0, n)
-                if j not in pos:
-                    break
-            pos.append(j)
-        for p in pos:
-            child_1[p], child_2[p] = child_2[p], child_1[p]
-        child_1 = Solution(child_1, sol_a.objectives)
-        child_2 = Solution(child_2, sol_a.objectives)
-        if child_1.dominates(child_2):
-            return child_1
-        else:
-            return child_2
+        beg = random.randint(0, n)
+        end = beg
+        while end <= beg:
+            end = random.randint(0, n)
+        child1, child2 = [], []
+        child1.extend(sol_a.solution)
+        child2.extend(sol_b.solution)
+        for i in xrange(beg, end+1):
+            gen1 = sol_a.solution[i]
+            gen2 = sol_b.solution[i]
+            if gen1 != gen2:
+                # buscar ambos genes en child1 y hacer swap
+                pg1 = child1.index(gen1)
+                pg2 = child1.index(gen2)
+                child1[pg1], child1[pg2] = child1[pg2], child1[pg1]
+                
+                # buscar ambos genes en child2 y hacer swap
+                pg1 = child2.index(gen1)
+                pg2 = child2.index(gen2)
+                child2[pg1], child2[pg2] = child2[pg2], child2[pg1]                
+        child1 = Solution(child1, sol_a.objectives)
+        child2 = Solution(child2, sol_a.objectives)
+        return [child1, child2]
+        
+        
         
     def mutation(self, sol):
         """
@@ -114,14 +122,21 @@ if __name__ == "__main__":
     from solution import Solution
     s1 = Solution(range(1,9), [])
     s2 = Solution([8,5,2,1,3,6,4,7], [])
+    print "s1: " + str(s1.solution)
+    print "s2: " + str(s2.solution)
     op = TspGeneticOperators()
-    print op.crossover(s1, s2).solution
+    print "Crossover"
+    print "hijo: " + str(op.crossover(s1, s2)[0].solution)
+    print "Mutation"
     print "antes: " + str(s1.solution)
     op.mutation(s1)
     print "despues:" + str(s1.solution)
     
     op = QapGeneticOperators()
-    print op.crossover(s1, s2).solution
+    print "Crossover"
+    print "hijo 1: " + str(op.crossover(s1, s2)[0].solution)
+    print "hijo 2: " + str(op.crossover(s1, s2)[1].solution)
+    print "Mutation"
     print "antes: " + str(s1.solution)
     op.mutation(s1)
     print "despues:" + str(s1.solution)
