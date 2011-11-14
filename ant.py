@@ -5,12 +5,15 @@ from random import *
 from solution import *
 
 class Ant:
-	def __init__(self, ferom_mat, visib_mats, objectives):
+	def __init__(self, beta, ant_number, total_ants, ferom_mat, visib_mats, objectives):
 		""" 
 		@param ferom_mat: matriz de feromonas.
 		@param visib_mats: matrices de visibilidad. Una por objetivo.				 
 		@param objectives:
 		"""
+		self.beta = beta
+		self.ant_number = ant_number
+		self.total_ants = total_ants
 		self.ferom_mat = ferom_mat
 		self.objectives = objectives
 		self.visib_mats = visib_mats
@@ -54,10 +57,11 @@ class M3ASAnt(Ant):
 		sol_len = len(self.ferom_mat)
 		sol = []
 		while(len(sol < sol_len):
-			probs = self.probability(sol)
+			probs = self.probability()
 			limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
 			aux = random()
 			for i in xrange(limits):
 				if aux <= limits[i]:
-				sol.append(probs[i][0])
+					sol.append(probs[i][0])
 		return Solution(sol, self.objectives)
+
