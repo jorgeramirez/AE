@@ -36,7 +36,7 @@ def parse_qap():
 		for i in xrange(3):
 			mat_objs[s].append([])
 			for j in xrange(n):
-				mat_objs[s][i].append([int(e) for e in f.readline().split()])
+				mat_objs[s][i].append([float(e) for e in f.readline().split()])
 			f.readline()
 		f.close()
 	return mat_objs
