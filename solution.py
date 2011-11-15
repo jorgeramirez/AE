@@ -27,11 +27,11 @@ class Solution:
         #Contexto de minimización
         band = False 
         for obj in self.objectives:
-            if obj.evaluate(self.solution) > obj.evaluate(other_solution):
+            if obj.evaluate(self) > obj.evaluate(other_solution):
                 band = False
                 break
             else:
-                if obj.evaluate(self.solution) <= obj.evaluate(other_solution):
+                if obj.evaluate(self) <= obj.evaluate(other_solution):
                     band = True
         return band
     
@@ -41,13 +41,13 @@ class Solution:
         @param other: la otra solucion a comparar
         """
         return self.solution == other.solution
-    
+
 	def __ne__(self, other):
-        """
-        operador != para objetos Solution
-        @param other: la otra solucion a comparar
-        """
-        return self.solution != other.solution
+		"""
+		operador != para objetos Solution
+		@param other: la otra solucion a comparar
+		"""
+		return self.solution != other.solution
 
 
 class ParetoSet:
@@ -69,10 +69,10 @@ class ParetoSet:
 			candidates = candidates[1:]
 			
         for candidate in candidates:
-            band, to_delete = domination_check(candidate)
+            band, to_delete = self.domination_check(candidate)
             if not band: #Si el candidato es no dominado con respecto al CP.
-                solutions = [s for s in solutions and s not in to_delete]
-                solutions.append(candidate)
+                self.solutions = [s for s in self.solutions if s not in to_delete]
+                self.solutions.append(candidate)
 
     def domination_check(self, candidate):
         """
@@ -82,7 +82,7 @@ class ParetoSet:
         @return: Lista de elementos del CP a eliminar
         """
         to_delete = []
-        for solution in solutions:
+        for solution in self.solutions:
             if solution.dominates(candidate): #La solución del CP domina al candidato
                 return True,[] #El candidato no se agrega al CP.
             else:

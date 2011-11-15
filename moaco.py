@@ -12,13 +12,13 @@ class Moaco():
 		self.total_generations = total_generations
 		self.visib_mats = []
 		self.pareto_set = ParetoSet(None)
-		for cost_mat in xrange(len(cost_mats)):
+		for cost_mat in cost_mats:
 			visib_mat = []
-			for row in xrange(len(cost_mat)):
-				visib_mat.append([1.0/e for e in row])
+			for row in cost_mat:
+				visib_mat.append([1.0/e if e != 0.0 else e for e in row ])
 			self.visib_mats.append(visib_mat)
 		
-	def run():
+	def run(self):
 		raise NotImplementedError("run method has to be implemented.")
 
 	

@@ -18,42 +18,34 @@ class Ant:
 		self.objectives = objectives
 		self.visib_mats = visib_mats
 		
-	def build_solution():
+	def build_solution(self):
 		"""
 		Construye una solución al problema planteado.
 		"""
 		raise NotImplementedError("build_solution method has to be implemented.")
 
-	def probability(, total_ants, city_number, ferom_mat, visib_mat_1, visib_mat_2, feasible_nodes, beta):
+	def probability(self, city_number, feasible_nodes):
 		"""
 		@param city_number: ciudad actual.
 
-		@param ferom_mat: matriz de feromonas.
-
-		@param visib_mat_1: matriz de visibilidades para el objetivo 1.
-
-		@param visib_mat_2: matriz de visibilidades para el objetivo 2.
-
 		@feasible_nodes: lista de posibles ciudades a ser visitadas en el siguiente movimiento.
-
-		@param beta: ponderacion relativa entre los objetivos
 		"""
-		lamda = ant_number / total_ants #lambda es una palabra reservada
+		lamda = self.ant_number / self.total_ants #lambda es una palabra reservada
 		total = 0
 		prob_list = list() #cada elemento tiene el numero de ciudad y su probabilidad asociada
 		for j in feasible_nodes:
-			total = total + ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** 
-				(lamda * beta) * visib_mat_2[city_number][j] ** ((1 - lamda) * beta)
+			total = total + self.ferom_mat[city_number][j] * self.visib_mats[0][city_number][j] ** \
+				(lamda * self.beta) * self.visib_mats[1][city_number][j] ** ((1 - lamda) * self.beta)
 
 		for j in feasible_nodes:
-			prob = (ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta)
-				* visib_mat_2[city_number][j] ** ((1 - lamda) * beta)) / total
+			prob = (self.ferom_mat[city_number][j] * self.visib_mats[0][city_number][j] ** (lamda * self.beta) \
+				* self.visib_mats[1][city_number][j] ** ((1 - lamda) * self.beta)) / total
 			prob_list.append([j, prob])
 
 		return prob_list
 		
 class MOACSAnt(Ant):
-	def build_solution:
+	def build_solution(self):
 		sol_len = len(self.ferom_mat)
 		sol = []
 		while(len(sol) < sol_len):
@@ -61,7 +53,7 @@ class MOACSAnt(Ant):
 			if q < qsubzero:
 				maximum = 0
 				for j in feasible_nodes:
-					aux = ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta) * 
+					aux = ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta) * \
 						visib_mat_2[city_number][j] ** ((1 - lamda) * beta)
 					if (aux > maximum):
 						maximum = aux
@@ -77,14 +69,15 @@ class MOACSAnt(Ant):
 
 
 class M3ASAnt(Ant):
-	def build_solution():
+	def build_solution(self):
 		sol_len = len(self.ferom_mat)
-		sol = []
+		sol = [randint(0, sol_len - 1)]
 		while(len(sol) < sol_len):
-			probs = self.probability()
-			limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
+			probs = self.probability(sol[-1], [i for i in range(sol_len) if i not in sol])
+			aux = [p[1] for p in probs]
+			limits = [sum(aux[:i+1]) for i in range(len(aux))]
 			aux = random()
-			for i in xrange(limits):
+			for i in xrange(len(limits)):
 				if aux <= limits[i]:
 					sol.append(probs[i][0])
 		return Solution(sol, self.objectives)
