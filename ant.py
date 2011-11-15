@@ -42,15 +42,39 @@ class Ant:
 		total = 0
 		prob_list = list() #cada elemento tiene el numero de ciudad y su probabilidad asociada
 		for j in feasible_nodes:
-			total = total + ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta) * visib_mat_2[city_number][j] ** ((1 - lamda) * beta)
+			total = total + ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** 
+				(lamda * beta) * visib_mat_2[city_number][j] ** ((1 - lamda) * beta)
 
 		for j in feasible_nodes:
-			prob = (ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta) * visib_mat_2[city_number][j] ** ((1 - lamda) * beta)) / 					total
+			prob = (ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta)
+				* visib_mat_2[city_number][j] ** ((1 - lamda) * beta)) / total
 			prob_list.append([j, prob])
 
 		return prob_list
 		
-		
+class MOACSAnt(Ant):
+	def build_solution:
+		sol_len = len(self.ferom_mat)
+		sol = []
+		while(len(sol) < sol_len):
+			q = random()
+			if q < qsubzero:
+				maximum = 0
+				for j in feasible_nodes:
+					aux = ferom_mat[city_number][j] * visib_mat_1[city_number][j] ** (lamda * beta) * 
+						visib_mat_2[city_number][j] ** ((1 - lamda) * beta)
+					if (aux > maximum):
+						maximum = aux
+				sol.append(maximum)
+			else:
+				probs = self.probability()
+				limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
+				aux = random()
+				for i in xrange(limits):
+					if aux <= limits[i]:
+						sol.append(probs[i][0])
+		return Solution(sol, self.objectives)
+
 
 class M3ASAnt(Ant):
 	def build_solution():
