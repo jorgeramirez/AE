@@ -3,7 +3,7 @@
 
 import os
 
-bp = "EA" + os.sep + "instancias" + os.sep
+bp = "instancias" + os.sep
 
 tsp_instances = [bp + "KROAB100.TSP.TXT", bp + "kroac100.tsp.txt"]
 qap_instances = [bp + "qapUni.75.0.1.qap.txt", bp + "qapUni.75.p75.1.qap.txt"]

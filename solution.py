@@ -41,6 +41,13 @@ class Solution:
         @param other: la otra solucion a comparar
         """
         return self.solution == other.solution
+    
+	def __ne__(self, other):
+        """
+        operador != para objetos Solution
+        @param other: la otra solucion a comparar
+        """
+        return self.solution != other.solution
 
 
 class ParetoSet:
