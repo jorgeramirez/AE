@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import random
+import random, math
 
 class NSGA:
     def __init__(self, num_objectives, genetic_operators, p, q, 
@@ -35,7 +35,7 @@ class NSGA:
             self.fitness_sharing(fronts)
             del P[:]
             #juntamos los frentes para formar P
-            for front in fronts:
+            for front in fronts.values():
                 P.extend(front)
             mating_pool = self.selection(P)
             P = self.next_generation(mating_pool, len(P))
@@ -79,8 +79,7 @@ class NSGA:
                     if n[s] == 0:
                         next_front.append(s)
             i += 1
-            fronts[i].append(next_front)
-        
+            fronts[i] = next_front
         return fronts
     
     def fitness_sharing(self, fronts):
@@ -92,17 +91,19 @@ class NSGA:
         """
         for i, front in fronts.items():
             min_dummy_fitness = 0.0
-            if i > 1: # para las siguientes poblaciones se asigna el dummy fitness como un valor un poco 
+            if i > 1: # para las siguientes poblaciones se asigna el dummy 
+                      # fitness como un valor un poco 
                       # menor al valor mínimo del frente anterior
-                fronts[i].sort()
-                min_dummy_fitness = fronts[i].fitness - 1.0
+                fronts[i-1].sort()
+                min_dummy_fitness = fronts[i-1][0].fitness - 1.0
             for sol in front:
                 if i > 1:
                     sol.fitness = min_dummy_fitness
                 m = self.niche_count(sol, front)
-                sol.fitness /= m
+                if m > 0:
+                    sol.fitness /= m
         
-    def niche_count(sol, front):
+    def niche_count(self, sol, front):
         """
         Calcula el niche count.
         
@@ -126,40 +127,42 @@ class NSGA:
         pool = []
         pool_size = len(population) / 2
         probs = self.probabilities(population)
-        limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
+        limits = [sum(probs[:i+1]) for i in xrange(len(probs))]
         while len(pool) < pool_size:
             aux = random.random()
-            for i in xrange(limits):
+            for i in xrange(len(limits)):
                 if aux <= limits[i]:
-                    pool.append(probs[i][0])
+                    pool.append(population[i])
         return pool
     
     def probabilities(self, population):
         """
-        Utiliza el fitness de cada solucion para retornar una lista de probabilidades
-        de seleccionar dicho elemento
+        Utiliza el fitness de cada solucion para retornar una lista de 
+        probabilidades de seleccionar dicho elemento
         """
         probs = []
         total_fitness = 0.0
         for p in population:
             total_fitness += p.fitness
         for p in population:
-            probs.append([p, p.fitness / total_fitness])
+            probs.append(p.fitness / total_fitness)
         return probs
     
     def next_generation(self, mating_pool, pop_size):
         """
-        Crea la siguiente generacion a partir del mating_pool y los operadores genéticos
+        Crea la siguiente generacion a partir del mating_pool y los operadores 
+        genéticos
         
-        @param mating_pool: mating pool utilizada para construir la siguiente generación de individuos
+        @param mating_pool: mating pool utilizada para construir la siguiente 
+                            generación de individuos
         """
         Q = []
         while len(Q) < pop_size:
             parents = []
             parents.append(random.choice(mating_pool))
-            other = random.choince(mating_pool)
+            other = random.choice(mating_pool)
             while parents[0] != other:
-                other = random.choince(mating_pool)
+                other = random.choice(mating_pool)
             parents.append(other)
             if random.random() < self.crossover_rate:
                 children = self.genetic_operators.crossover(parents[0], parents[1])
@@ -172,13 +175,26 @@ class NSGA:
 if __name__ == "__main__":
     import cparser
     from objectivefunction import TSPObjectiveFunction
+    from ga import GaSolution, TspGeneticOperators
+    from solution import ParetoSet, ParetoFront
     tsp_parsed = cparser.parse_tsp()
-    objs = [TSPObjectiveFunction(tsp_parsed[0][0]), TSPObjectiveFunction(tsp_parsed[0][1])]
+    op = TspGeneticOperators()
+    objs = [TSPObjectiveFunction(tsp_parsed[0][0]), 
+            TSPObjectiveFunction(tsp_parsed[0][1])]
     P = []
-    p, q = 2, 20
+    p, q = 2, 5
     n = len(objs[0].mat[0])
-    for i in xrange(100):
+    for i in xrange(20):
         sol = range(n)
         random.shuffle(sol)
-    # TODO
-    
+        P.append(GaSolution(sol, objs))
+    nsga = NSGA(len(objs), op, p, q)
+    nsga.run(P, 100)
+    ps = ParetoSet()
+    ps.update(P)
+    pf = ParetoFront(ps)
+    print "Pareto Set"
+    for s in ps.solutions:
+        print s.solution
+    print "\n\nPareto Front"
+    print pf.pareto_front

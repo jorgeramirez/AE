@@ -4,7 +4,7 @@
 import random, sys, math
 from solution import Solution
 
-class GaSolution(Solution):
+class GaSolution(Solution, object):
     def __init__(self, solution, objectives):
         Solution.__init__(self, solution, objectives)
         self.fitness = float(sys.maxint)
@@ -21,6 +21,12 @@ class GaSolution(Solution):
         for v1, v2 in zip(me_objs, other_objs):
             dist += math.pow(v1-v2, 2)
         return math.sqrt(dist)
+    
+    def __cmp__(self, other):
+        """
+        Retorna negativo si x<y, cero si x==y, positivo si x>y
+        """
+        return self.fitness - other.fitness
 
 
 class GeneticOperators:
@@ -64,7 +70,7 @@ class TspGeneticOperators(GeneticOperators):
             if child[i] < 0:
                 child[i] = s
         
-        return [Solution(child, sol_a.objectives)]
+        return [GaSolution(child, sol_a.objectives)]
     
     def mutation(self, sol):
         """
@@ -115,11 +121,9 @@ class QapGeneticOperators(GeneticOperators):
                 pg1 = child2.index(gen1)
                 pg2 = child2.index(gen2)
                 child2[pg1], child2[pg2] = child2[pg2], child2[pg1]                
-        child1 = Solution(child1, sol_a.objectives)
-        child2 = Solution(child2, sol_a.objectives)
+        child1 = GaSolution(child1, sol_a.objectives)
+        child2 = GaSolution(child2, sol_a.objectives)
         return [child1, child2]
-        
-        
         
     def mutation(self, sol):
         """
@@ -138,9 +142,8 @@ class QapGeneticOperators(GeneticOperators):
 
 
 if __name__ == "__main__":
-    from solution import Solution
-    s1 = Solution(range(1,9), [])
-    s2 = Solution([8,5,2,1,3,6,4,7], [])
+    s1 = GaSolution(range(1,9), [])
+    s2 = GaSolution([8,5,2,1,3,6,4,7], [])
     print "s1: " + str(s1.solution)
     print "s2: " + str(s2.solution)
     op = TspGeneticOperators()
