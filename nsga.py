@@ -133,6 +133,7 @@ class NSGA:
             for i in xrange(len(limits)):
                 if aux <= limits[i]:
                     pool.append(population[i])
+                    break
         return pool
     
     def probabilities(self, population):

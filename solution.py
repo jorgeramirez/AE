@@ -3,6 +3,9 @@
 
 from objectivefunction import *
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 class Solution:
     def __init__(self, solution, objectives):
         """ 
@@ -105,5 +108,16 @@ class ParetoFront:
         """
         self.pareto_front = [s.evaluate() for s in pareto_set.solutions]
         
-    
+    def draw(self, subplot=111):
+        """
+        Dibuja el frente pareto.
+        
+        @param subplot: posición del gráfico.
+        """
+        fig = plt.figure()
+        pf_ax = fig.add_subplot(subplot)
+        pf_ax.set_title(u"Frente Pareto")
+        for p in self.pareto_front:
+            pf_ax.scatter(p[0], p[1], marker='o', facecolor='blue')
+        plt.show()
     
