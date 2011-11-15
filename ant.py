@@ -24,7 +24,7 @@ class Ant:
 		"""
 		raise NotImplementedError("build_solution method has to be implemented.")
 
-	def probability(ant_number, total_ants, city_number, ferom_mat, visib_mat_1, visib_mat_2, feasible_nodes, beta):
+	def probability(, total_ants, city_number, ferom_mat, visib_mat_1, visib_mat_2, feasible_nodes, beta):
 		"""
 		@param city_number: ciudad actual.
 
@@ -56,7 +56,7 @@ class M3ASAnt(Ant):
 	def build_solution():
 		sol_len = len(self.ferom_mat)
 		sol = []
-		while(len(sol < sol_len):
+		while(len(sol) < sol_len):
 			probs = self.probability()
 			limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
 			aux = random()

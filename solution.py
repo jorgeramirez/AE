@@ -48,7 +48,7 @@ class ParetoSet:
     def __init__(self, solutions):
         """
         @param solutions: lista de soluciones del frente pareto. Si no
-                          se conoce previamente, utilizar Solution([], objs)
+                          se conoce previamente, utilizar solution = none
         """
         self.solutions = solutions
         
@@ -57,6 +57,10 @@ class ParetoSet:
         @param solutions: lista de soluciones para actualizar el frente
                           pareto
         """
+        if not self.solutions:
+			self.solutions = [candidates[0]]
+			candidates = candidates[1:]
+			
         for candidate in candidates:
             band, to_delete = domination_check(candidate)
             if not band: #Si el candidato es no dominado con respecto al CP.
