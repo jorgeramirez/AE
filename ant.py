@@ -65,20 +65,22 @@ class MOACSAnt(Ant):
 				for i in xrange(limits):
 					if aux <= limits[i]:
 						sol.append(probs[i][0])
+                        break
 		return Solution(sol, self.objectives)
 
 
 class M3ASAnt(Ant):
-	def build_solution(self):
-		sol_len = len(self.ferom_mat)
-		sol = [randint(0, sol_len - 1)]
-		while(len(sol) < sol_len):
-			probs = self.probability(sol[-1], [i for i in range(sol_len) if i not in sol])
-			aux = [p[1] for p in probs]
-			limits = [sum(aux[:i+1]) for i in range(len(aux))]
-			aux = random()
-			for i in xrange(len(limits)):
-				if aux <= limits[i]:
-					sol.append(probs[i][0])
-		return Solution(sol, self.objectives)
+    def build_solution(self):
+        sol_len = len(self.ferom_mat)
+        sol = [randint(0, sol_len - 1)]
+        while(len(sol) < sol_len):
+            probs = self.probability(sol[-1], [i for i in range(sol_len) if i not in sol])
+            aux = [p[1] for p in probs]
+            limits = [sum(aux[:i+1]) for i in range(len(aux))]
+            aux = random()
+            for i in xrange(len(limits)):
+                if aux <= limits[i]:
+                    sol.append(probs[i][0])
+                    break
+        return Solution(sol, self.objectives)
 
