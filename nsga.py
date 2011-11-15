@@ -171,4 +171,14 @@ class NSGA:
 
 if __name__ == "__main__":
     import cparser
+    from objectivefunction import TSPObjectiveFunction
     tsp_parsed = cparser.parse_tsp()
+    objs = [TSPObjectiveFunction(tsp_parsed[0][0]), TSPObjectiveFunction(tsp_parsed[0][1])]
+    P = []
+    p, q = 2, 20
+    n = len(objs[0].mat[0])
+    for i in xrange(100):
+        sol = range(n)
+        random.shuffle(sol)
+    # TODO
+    
