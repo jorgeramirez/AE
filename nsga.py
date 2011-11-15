@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import random
+
 class NSGA:
     def __init__(self, num_objectives, genetic_operators, p, q, 
                  cr=1.0, mr=0.1):
@@ -31,9 +33,13 @@ class NSGA:
         for i in xrange(num_generations):
             fronts = self.classify_population(P)
             self.fitness_sharing(fronts)
-            
-    
-    
+            del P[:]
+            #juntamos los frentes para formar P
+            for front in fronts:
+                P.extend(front)
+            mating_pool = self.selection(P)
+            P = self.next_generation(mating_pool, len(P))
+
     def classify_population(self, population):
         """
         Clasifica la población en regiones no dominadas.
@@ -84,8 +90,17 @@ class NSGA:
         
         @param fronts: Diccionario de frentes
         """
-        pass
-        
+        for i, front in fronts.items():
+            min_dummy_fitness = 0.0
+            if i > 1: # para las siguientes poblaciones se asigna el dummy fitness como un valor un poco 
+                      # menor al valor mínimo del frente anterior
+                fronts[i].sort()
+                min_dummy_fitness = fronts[i].fitness - 1.0
+            for sol in front:
+                if i > 1:
+                    sol.fitness = min_dummy_fitness
+                m = self.niche_count(sol, front)
+                sol.fitness /= m
         
     def niche_count(sol, front):
         """
@@ -103,3 +118,57 @@ class NSGA:
                 sh = 1.0 - dist / self.sigma_share
             m += sh
         return m
+    
+    def selection(self, population):
+        """
+        Realiza la selección y retorna el mating_pool
+        """
+        pool = []
+        pool_size = len(population) / 2
+        probs = self.probabilities(population)
+        limits = [sum(probs[:i+1][1]) for i in range(len(probs))]
+        while len(pool) < pool_size:
+            aux = random.random()
+            for i in xrange(limits):
+                if aux <= limits[i]:
+                    pool.append(probs[i][0])
+        return pool
+    
+    def probabilities(self, population):
+        """
+        Utiliza el fitness de cada solucion para retornar una lista de probabilidades
+        de seleccionar dicho elemento
+        """
+        probs = []
+        total_fitness = 0.0
+        for p in population:
+            total_fitness += p.fitness
+        for p in population:
+            probs.append([p, p.fitness / total_fitness])
+        return probs
+    
+    def next_generation(self, mating_pool, pop_size):
+        """
+        Crea la siguiente generacion a partir del mating_pool y los operadores genéticos
+        
+        @param mating_pool: mating pool utilizada para construir la siguiente generación de individuos
+        """
+        Q = []
+        while len(Q) < pop_size:
+            parents = []
+            parents.append(random.choice(mating_pool))
+            other = random.choince(mating_pool)
+            while parents[0] != other:
+                other = random.choince(mating_pool)
+            parents.append(other)
+            if random.random() < self.crossover_rate:
+                children = self.genetic_operators.crossover(parents[0], parents[1])
+                if random.random() < self.mutation_rate:
+                    self.genetic_operators.mutation(random.choice(children))
+                Q.extend(children)
+        return Q
+
+
+if __name__ == "__main__":
+    import cparser
+    tsp_parsed = cparser.parse_tsp()

@@ -7,7 +7,7 @@ from solution import Solution
 class GaSolution(Solution):
     def __init__(self, solution, objectives):
         Solution.__init__(self, solution, objectives)
-        self.fitness = sys.maxint
+        self.fitness = float(sys.maxint)
     
     def distance(self, other):
         """
