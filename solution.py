@@ -3,6 +3,9 @@
 
 from objectivefunction import *
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 class Solution:
     def __init__(self, solution, objectives):
         """ 
@@ -41,18 +44,18 @@ class Solution:
         @param other: la otra solucion a comparar
         """
         return self.solution == other.solution
-
-	def __ne__(self, other):
-		"""
-		operador != para objetos Solution
-		@param other: la otra solucion a comparar
-		"""
-		return self.solution != other.solution
+    
+    def __ne__(self, other):
+        """
+        operador != para objetos Solution
+        @param other: la otra solucion a comparar
+        """
+        return self.solution != other.solution
 
 
 class ParetoSet:
 
-    def __init__(self, solutions):
+    def __init__(self, solutions=None):
         """
         @param solutions: lista de soluciones del frente pareto. Si no
                           se conoce previamente, utilizar solution = none
@@ -65,9 +68,9 @@ class ParetoSet:
                           pareto
         """
         if not self.solutions:
-			self.solutions = [candidates[0]]
-			candidates = candidates[1:]
-			
+            self.solutions = [candidates[0]]
+            candidates = candidates[1:]
+            
         for candidate in candidates:
             band, to_delete = self.domination_check(candidate)
             if not band: #Si el candidato es no dominado con respecto al CP.
@@ -103,7 +106,18 @@ class ParetoFront:
         @return: una lista del formato 
                 [[f1(x1),f2(x1),....fk(x1)],[f1(x2),f2(x2),....fk(x2)],....,[f1(xn),f2(xn),....fk(xn)]]
         """
-        self.pareto_front = [s.evaluate for s in pareto_set.solutions]
+        self.pareto_front = [s.evaluate() for s in pareto_set.solutions]
         
-    
+    def draw(self, subplot=111):
+        """
+        Dibuja el frente pareto.
+        
+        @param subplot: posición del gráfico.
+        """
+        fig = plt.figure()
+        pf_ax = fig.add_subplot(subplot)
+        pf_ax.set_title(u"Frente Pareto")
+        for p in self.pareto_front:
+            pf_ax.scatter(p[0], p[1], marker='o', facecolor='blue')
+        plt.show()
     
