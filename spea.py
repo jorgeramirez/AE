@@ -7,6 +7,7 @@ from ga import GaSolution, GeneticOperators
 from solution import ParetoSet, ParetoFront
 import random
 from cluster import Cluster
+import sys
 class SPEA:
     def __init__(self, num_objectives, genetic_operators, max_pareto_points, cr=1.0, mr=0.1):
         pareto_set = ParetoSet(None)
@@ -56,37 +57,31 @@ class SPEA:
 
 
     def reduce_pareto_set(self, par_set):
-        c1 = None
-        c2 = None
-        
+        """
+        Realiza el clustering
+        """
         lista_cluster=[]
         for solucion in par_set.solutions:
             cluster = Cluster()
             cluster.agregar_solucion(solucion)
             lista_cluster.append(cluster)
-            
-        while len(lista_cluster) > self.max_pareto_points:  
-            """Calcular los dos clusteres mas cercanos""" 
-            min_distancia = -1
+  
+        while len(lista_cluster) > self.max_pareto_points:
+            print len(lista_cluster)
+            min_distancia = sys.maxint
             for i in range (0,len(lista_cluster)-1):
-                for j in range(i+1, len(lista_cluster) -1): 
+                for j in range(i+1, len(lista_cluster)-1): 
                     c = lista_cluster[i]
                     distancia = c.calcular_distancia(lista_cluster[j])
-                    if min_distancia == -1 or distancia < min_distancia:
+                    #if min_distancia == -1 or distancia < min_distancia:
+                    if distancia < min_distancia:
                         min_distancia = distancia
                         c1 = i
                         c2 = j
-
-            cont =-1
-            for solucion in lista_cluster:
-                cont = cont +1
                
-            print "unir: "+ str(c1) + " con " + str(c2) + " distancia: "+ str(min_distancia)
-            print "\n\n"
             cluster = lista_cluster[c1].unir(lista_cluster[c2]) #retorna un nuevo cluster 
-
-            del lista_cluster[c2]
             del lista_cluster[c1]
+            del lista_cluster[c2]
 
             lista_cluster.append(cluster)
         
@@ -126,24 +121,29 @@ class SPEA:
                             generación de individuos
         """
         Q = []
+        
+        #cruzamiento
         while len(Q) < pop_size:
             parents = []
             parents.append(random.choice(mating_pool))
             other = random.choice(mating_pool)
-            while parents[0] != other:
-                other = random.choice(mating_pool)
             parents.append(other)
             if random.random() < self.crossover_rate:
                 children = self.genetic_operators.crossover(parents[0], parents[1])
-                if random.random() < self.mutation_rate:
-                    self.genetic_operators.mutation(random.choice(children))
                 Q.extend(children)
+            else:
+                Q.extend(parents)
+        
+        for ind in Q:
+            if random.random() < self.mutation_rate:
+                self.genetic_operators.mutation(ind)
+                ind.evaluation = ind.evaluate()
         return Q
 
 def test_tsp(n = 5, i = 0):
     total_ind = 10
     total_generations = 100
-    p, q = 2, 5
+    max_pareto_size = 20
     op = GeneticOperators()
     instancias = parse_tsp()
     cost_mats = instancias[i]
@@ -151,7 +151,7 @@ def test_tsp(n = 5, i = 0):
     for cost_mat in cost_mats:
         objs.append(TSPObjectiveFunction(cost_mat))
     num_cities = len(objs[0].mat)
-    spea = SPEA(len(objs), op, 2)
+    spea = SPEA(len(objs), op, max_pareto_size)
     pareto_set = ParetoSet(None)
     for i in xrange(n):
         pop = []
@@ -167,8 +167,9 @@ def test_tsp(n = 5, i = 0):
 
 
 def test_qap(n = 5, i = 0):
-    total_ind = 20
+    total_ind = 10
     total_generations = 100
+    max_pareto_size = 20
     op = GeneticOperators()
     instancias = parse_qap()
     flux_mats = instancias[i][:-1]
@@ -177,7 +178,7 @@ def test_qap(n = 5, i = 0):
     objs = []
     for cost_mat in flux_mats:
         objs.append(QAPObjectiveFunction(dist_mat, cost_mat))
-    spea = SPEA(len(objs), op, 20)
+    spea = SPEA(len(objs), op, max_pareto_size)
     pareto_set = ParetoSet(None)
     for i in xrange(n):
         pop = []
@@ -190,9 +191,3 @@ def test_qap(n = 5, i = 0):
     pareto_front = ParetoFront(pareto_set)
     pareto_front.draw()
     return pareto_set
-
-
-
-
- #   spea = SPEA(len(objs), op, 20)
-  #  spea.run(P, 100)
