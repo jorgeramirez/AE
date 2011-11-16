@@ -69,29 +69,19 @@ class TspM3as(M3as):
 class QapM3as(M3as):
     def __init__(self, taumax, taumin, beta, rho, cost_mats, dist_mat, total_ants, total_generations):
         M3as.__init__(self, taumax, taumin, beta, rho, cost_mats, total_ants, total_generations)
-        flux_mats = cost_mats #en esta variable se recibe las matrices de flujo
-        cost_mats = []
-        n = len(flux_mats[0])
-        for flux_mat in flux_mats:
-            init_row = [0 for e in xrange(n)]
-            cost_mat = [deepcopy(init_row) for e in xrange(n)]
-            for k in xrange(n):
-                for j in xrange(n):
-                    cost_mat[k][j] = flux_mat[k][j] * dist_mat[k][j]
-            cost_mats.append(cost_mat)        
+        #flux_mats == cost_mats: en esta variable se recibe las matrices de flujo
+        n = len(cost_mats[0])
+        max_dist = 0 
+        for dist_row in dist_mat:
+            if max(dist_row) > max_dist:
+                max_dist = max(dist_row)      
         for cost_mat in cost_mats:
             max_val = 0
             for i in xrange(n):
                 if max(cost_mat[i]) > max_val:
                     max_val = max(cost_mat[i])
-            self.max_values.append(max_val)
-            #Se usa la TSPObjectiveFunction debido a que se le pasa la matriz
-            #de costos resultantes del producto entre flujo y distancia
-            #por tanto la evaluación de la FO de QAP queda reducida a
-            #una sumatoria de costos de arcos, al igual que el TSP
-            #Idealmente TSPObjectiveFunction debería tomar un nombre
-            #más apropiado como PathSumObjectiveFunction
-            self.objectives.append(TSPObjectiveFunction(cost_mat))
+            self.max_values.append(max_val*max_dist)
+            self.objectives.append(QAPObjectiveFunction(dist_mat, cost_mat))
             
         
 
@@ -124,7 +114,7 @@ def testTsp(n = 5, i = 0):
         print ""
         print ""
     """
-    return 0
+    return pareto_set
 
 def testQap(n = 5, i = 0):
     taumax = 0.0000053
@@ -154,9 +144,9 @@ def testQap(n = 5, i = 0):
         print ""
         print ""
     """
-    return 0
+    return pareto_set
 
 
 if __name__ == '__main__':
-	testQap()
-
+    testQap()
+    testTsp()
