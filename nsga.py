@@ -3,7 +3,7 @@
 
 from cparser import parse_qap, parse_tsp
 from objectivefunction import TSPObjectiveFunction, QAPObjectiveFunction
-from ga import GaSolution, TspGeneticOperators, QapGeneticOperators
+from ga import GaSolution, GeneticOperators
 from solution import ParetoSet, ParetoFront
 
 import numpy as np
@@ -13,7 +13,7 @@ import random, math
 
 class NSGA:
     def __init__(self, num_objectives, genetic_operators, p, q, 
-                 ss, cr=1.0, mr=0.1):
+                 cr=1.0, mr=0.1):
         """
         @param num_objectives: numero de objetivos
         @param genetic_operators: objeto que representa a los operadores 
@@ -29,9 +29,7 @@ class NSGA:
         self.mutation_rate = mr
         
         #calculamos sigma_share de acuerdo a Deb 1999
-        #self.sigma_share = 0.5 / math.pow(float(q), 1.0/float(p))
-        #self.sigma_share = 0.5 / math.pow(float(5), 1.0/float(2))
-        self.sigma_share = ss
+        self.sigma_share = 0.5 / math.pow(float(q), 1.0/float(p))
     
     def run(self, P, num_generations):
         """
@@ -114,7 +112,6 @@ class NSGA:
                 m = self.niche_count(sol, front)
                 if m > 0:
                     sol.fitness = sol.fitness / m
-            
         
     def niche_count(self, sol, front):
         """
@@ -124,10 +121,19 @@ class NSGA:
         @param front: el frente al cual pertenece la solucion
         """
         m = 0.0
+        import sys
+        uppers = [0 for _ in xrange(len(sol.objectives))]
+        lowers = [sys.maxint for _ in xrange(len(sol.objectives))]
+        for solution in front:
+            for i, v in enumerate(solution.evaluation):
+                if v > uppers[i]:
+                    uppers[i] = v
+                if v < lowers[i]:
+                    lowers[i] = v
         for r in front:
             if r == sol: continue
             sh = 0.0 #sharing function value
-            dist = sol.distance(r)
+            dist = sol.distance(r, uppers, lowers)
             if dist <= self.sigma_share:
                 sh = 1.0 - dist / self.sigma_share
             m += sh
@@ -195,51 +201,48 @@ def test_tsp(n = 5, i = 0):
     total_ind = 10
     total_generations = 100
     p, q = 2, 5
-    sigma = 10000.0
-    op = TspGeneticOperators()
+    op = GeneticOperators()
     instancias = parse_tsp()
     cost_mats = instancias[i]
     objs = []
-    P = []
     for cost_mat in cost_mats:
         objs.append(TSPObjectiveFunction(cost_mat))
     num_cities = len(objs[0].mat)
-    for i in xrange(total_ind):
-        sol = range(num_cities)
-        random.shuffle(sol)
-        P.append(GaSolution(sol, objs))
-    nsga = NSGA(len(objs), op, p, q, sigma, mr=0.2)
+    nsga = NSGA(len(objs), op, p, q, mr=0.2)
     pareto_set = ParetoSet(None)
     for i in xrange(n):
-        nsga.run(P, total_generations)
-        pareto_set.update(P)
+        pop = []
+        for i in xrange(total_ind):
+            sol = range(num_cities)
+            random.shuffle(sol)
+            pop.append(GaSolution(sol, objs))        
+        nsga.run(pop, total_generations)
+        pareto_set.update(pop)
     pareto_front = ParetoFront(pareto_set)
     pareto_front.draw()
 
 
 def test_qap(n = 5, i = 0):
-    total_ind = 10
+    total_ind = 20
     total_generations = 100
     p, q = 2, 5
-    sigma = 10000.0
-    op = QapGeneticOperators()
+    op = GeneticOperators()
     instancias = parse_qap()
     flux_mats = instancias[i][:-1]
     dist_mat = instancias[i][-1]
     num_loc = len(flux_mats[0]) #nro de localidades
     objs = []
-    P = []
     for cost_mat in flux_mats:
         objs.append(QAPObjectiveFunction(dist_mat, cost_mat))
-    for i in xrange(total_ind):
-        sol = range(num_loc)
-        random.shuffle(sol)
-        P.append(GaSolution(sol, objs))
-    nsga = NSGA(len(objs), op, p, q, sigma, mr=0.2)
+    nsga = NSGA(len(objs), op, p, q, mr=0.2)
     pareto_set = ParetoSet(None)
     for i in xrange(n):
-        nsga.run(P, total_generations)
-        pareto_set.update(P)
+        pop = []
+        for i in xrange(total_ind):
+            sol = range(num_loc)
+            random.shuffle(sol)
+            pop.append(GaSolution(sol, objs))
+        nsga.run(pop, total_generations)
+        pareto_set.update(pop)
     pareto_front = ParetoFront(pareto_set)
     pareto_front.draw()
-
