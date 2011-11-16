@@ -16,12 +16,11 @@ class Moacs(Moaco):
 			self.ferom_mat.append([tausubzero for j in range(n)]) #inicializar feromonas
 		self.objectives = []
 		self.max_values = []
-		for cost_mat in cost_mats:
-			self.objectives.append(TSPObjectiveFunction(cost_mat)) #construye matrices de objetivos (distancias)
 
 
 	def run(self):
 		for g in xrange(self.total_generations):
+			print g
 			for ant_number in xrange(self.total_ants):
 				ant = MOACSAnt(self.beta, ant_number, self.total_ants, self.ferom_mat, self.visib_mats, \
 					self.objectives, self.tausubzero, self.qsubzero, self.rho)
@@ -55,21 +54,55 @@ class Moacs(Moaco):
 		for i in xrange(n):
 			self.ferom_mat.append([self.tausebzero for j in range(n)])
 
-def main():
+class TspMoacs(Moacs):
+	def __init__(self, qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations):
+		Moacs.__init__(self, qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations)
+		for cost_mat in cost_mats:
+			self.objectives.append(TSPObjectiveFunction(cost_mat)) #construye matrices de objetivos (distancias)
+
+class QapMoacs(Moacs):
+	def __init__(self, qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations, dist_mat):
+		Moacs.__init__(self, qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations)
+		for cost_mat in cost_mats:
+		    self.objectives.append(QAPObjectiveFunction(dist_mat, cost_mat))
+
+def testTsp(n =5, i = 0):
 	beta = 1
 	rho = 0.1
 	qsubzero = 0.9
-	tausubzero = 0.0000000000001 #REVISAR
+	tausubzero = 0.0000000000001
 	total_ants = 10
 	total_generations = 100
 	instancias = parse_tsp()
-	cost_mats = instancias[0]
-	tspMoacs = Moacs(qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations)
-	result = tspMoacs.run()
-	pareto_front = ParetoFront(result)
+	cost_mats = instancias[i]
+	tspMoacs = TspMoacs(qsubzero, tausubzero, beta, rho, cost_mats, total_ants, total_generations)
+	pareto_set = ParetoSet(None)
+	for i in xrange(n):
+		result = tspMoacs.run()
+		pareto_set.update(result.solutions)
+	pareto_front = ParetoFront(pareto_set)
 	pareto_front.draw()
-	return 0
+	return pareto_set
+
+def testQap(n = 5, i = 0):
+	beta = 1
+	rho = 0.1
+	qsubzero = 0.9
+	tausubzero = 0.0000000000001
+	total_ants = 10
+	total_generations = 100
+	instancias = parse_qap()
+	flux_mats = instancias[i][:-1]
+	dist_mat = instancias[i][-1]
+	qapMoacs = QapMoacs(qsubzero, tausubzero, beta, rho, flux_mats, total_ants, total_generations, dist_mat)
+	pareto_set = ParetoSet(None)
+	for i in xrange(n):
+		result = qapMoacs.run()
+		pareto_set.update(result.solutions)
+	pareto_front = ParetoFront(pareto_set)
+	pareto_front.draw()
+	return pareto_set
 
 if __name__ == '__main__':
-	main()
-
+	testQap()
+	testTsp()

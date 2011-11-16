@@ -61,6 +61,7 @@ class MOACSAnt(Ant):
 		if q < self.qsubzero:
 			max_prob = 0
 			max_node = 0
+
 			for j in feasible_nodes:
 				aux = self.ferom_mat[city_number][j] * self.visib_mats[0][city_number][j] ** (lamda * self.beta) * \
 					self.visib_mats[1][city_number][j] ** ((1 - lamda) * self.beta)
@@ -92,7 +93,8 @@ class MOACSAnt(Ant):
 			actual_node = sol[-1]
 			next_node = self.choose_next_node(actual_node, [i for i in range(sol_len) if i not in sol])
 			for j in xrange(len(self.objectives)):
-				self.sum_obj[j] = self.sum_obj[j] + self.objectives[j].mat[actual_node][next_node] #actualizar la suma de objetivos
+				self.sum_obj[j] = self.sum_obj[j] + self.objectives[j].cost_i_to_j(actual_node, next_node) #actualizar la suma de objetivos
+				#self.sum_obj[j] = self.sum_obj[j] + self.objectives[j].mat[actual_node][next_node] #actualizar la suma de objetivos
 
 			#actualizacion de feromonas
 			self.ferom_mat[actual_node][next_node] = (1 - self.rho) * self.ferom_mat[actual_node][next_node] + self.rho * self.tausubzero
