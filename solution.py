@@ -21,6 +21,7 @@ class Solution:
         @return: una lista de las evaluaciones de la solución para cada
                  función objetivo
         """
+        #print self.objectives
         return [o.evaluate(self) for o in self.objectives]
         
     def dominates(self, other_solution):

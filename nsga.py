@@ -162,14 +162,15 @@ class NSGA:
             parents = []
             parents.append(random.choice(mating_pool))
             other = random.choice(mating_pool)
-            while parents[0] != other:
+            while parents[0] == other:
                 other = random.choice(mating_pool)
             parents.append(other)
             if random.random() < self.crossover_rate:
                 children = self.genetic_operators.crossover(parents[0], parents[1])
-                if random.random() < self.mutation_rate:
-                    self.genetic_operators.mutation(random.choice(children))
-                Q.extend(children)
+                if children:
+                    if random.random() < self.mutation_rate:
+                        self.genetic_operators.mutation(random.choice(children))
+                    Q.extend(children)
         return Q
 
 
