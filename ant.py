@@ -36,7 +36,7 @@ class Ant:
 		for j in feasible_nodes:
 			total = total + self.ferom_mat[city_number][j] * self.visib_mats[0][city_number][j] ** \
 				(lamda * self.beta) * self.visib_mats[1][city_number][j] ** ((1 - lamda) * self.beta)
-
+			
 		for j in feasible_nodes:
 			prob = (self.ferom_mat[city_number][j] * self.visib_mats[0][city_number][j] ** (lamda * self.beta) \
 				* self.visib_mats[1][city_number][j] ** ((1 - lamda) * self.beta)) / total

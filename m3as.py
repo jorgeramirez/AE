@@ -4,6 +4,7 @@
 from cparser import *
 from moaco import *
 from ant import *
+from copy import *
 
 class M3as(Moaco):
     def __init__(self, taumax, taumin, beta, rho, cost_mats, total_ants, total_generations):
@@ -17,13 +18,7 @@ class M3as(Moaco):
             self.ferom_mat.append([taumax for j in range(n)])
         self.objectives = []
         self.max_values = []
-        for cost_mat in cost_mats:
-            max_val = 0
-            for i in xrange(n):
-                if max(cost_mat[i]) > max_val:
-                    max_val = max(cost_mat[i])
-            self.max_values.append(max_val)
-            self.objectives.append(TSPObjectiveFunction(cost_mat))
+        
 		
     def run(self):
         for g in xrange(self.total_generations):
@@ -33,7 +28,8 @@ class M3as(Moaco):
                 self.pareto_set.update([solution])
             self.evaporate_feromones()
             self.update_feromones()
-        return self.pareto_set.solutions
+            print g
+        return self.pareto_set
 				
     def evaporate_feromones(self):
         n = len(self.ferom_mat)
@@ -56,25 +52,111 @@ class M3as(Moaco):
                 self.ferom_mat[s][d] = self.ferom_mat[s][d] + deltaTau
                 if self.ferom_mat[s][d] > self.taumax:
                     self.ferom_mat[s][d] = self.taumax
+                    
+class TspM3as(M3as):
+    def __init__(self, taumax, taumin, beta, rho, cost_mats, total_ants, total_generations):
+        M3as.__init__(self, taumax, taumin, beta, rho, cost_mats, total_ants, total_generations)
+        n = len(cost_mats[0])
+        flux_mats = cost_mats #en esta variable se reciben las matrices de flujo
+        for cost_mat in cost_mats:
+            max_val = 0
+            for i in xrange(n):
+                if max(cost_mat[i]) > max_val:
+                    max_val = max(cost_mat[i])
+            self.max_values.append(max_val)
+            self.objectives.append(TSPObjectiveFunction(cost_mat))
+            
+class QapM3as(M3as):
+    def __init__(self, taumax, taumin, beta, rho, cost_mats, dist_mat, total_ants, total_generations):
+        M3as.__init__(self, taumax, taumin, beta, rho, cost_mats, total_ants, total_generations)
+        flux_mats = cost_mats #en esta variable se recibe las matrices de flujo
+        cost_mats = []
+        n = len(flux_mats[0])
+        for flux_mat in flux_mats:
+            init_row = [0 for e in xrange(n)]
+            cost_mat = [deepcopy(init_row) for e in xrange(n)]
+            for k in xrange(n):
+                for j in xrange(n):
+                    cost_mat[k][j] = flux_mat[k][j] * dist_mat[k][j]
+            cost_mats.append(cost_mat)        
+        for cost_mat in cost_mats:
+            max_val = 0
+            for i in xrange(n):
+                if max(cost_mat[i]) > max_val:
+                    max_val = max(cost_mat[i])
+            self.max_values.append(max_val)
+            #Se usa la TSPObjectiveFunction debido a que se le pasa la matriz
+            #de costos resultantes del producto entre flujo y distancia
+            #por tanto la evaluación de la FO de QAP queda reducida a
+            #una sumatoria de costos de arcos, al igual que el TSP
+            #Idealmente TSPObjectiveFunction debería tomar un nombre
+            #más apropiado como PathSumObjectiveFunction
+            self.objectives.append(TSPObjectiveFunction(cost_mat))
+            
+        
+
+        
 			
 				
-def main():
-	taumax = 0.0023
-	taumin = 0.000071
-	beta = 1
-	rho = 0.02
-	total_ants = 100
-	total_generations = 100
-	instancias = parse_tsp()
-	cost_mats = instancias[0]
-	tspM3as = M3as(taumax, taumin, beta, rho, cost_mats, total_ants, total_generations)
-	result = tspM3as.run()
-	for r in result:
-		print r.solution
-		print ""
-		print ""
-	return 0
+def testTsp(n = 5, i = 0):
+    taumax = 0.0023
+    taumin = 0.0000071
+    beta = 1
+    rho = 0.02
+    total_ants = 10
+    total_generations = 100
+    instancias = parse_tsp()
+    cost_mats = instancias[i]
+    tspM3as = TspM3as(taumax, taumin, beta, rho, cost_mats, total_ants, total_generations)
+    pareto_set = ParetoSet(None)
+    for i in xrange(n):
+        result = tspM3as.run()
+        pareto_set.update(result.solutions)
+    pareto_front = ParetoFront(pareto_set)
+    pareto_front.draw()
+    """print "\n\nFrente Pareto"
+    for p in pareto_front.pareto_front:
+        print p
+        print ""
+    print "\n\nConjunto Pareto"    
+    for r in result.solutions:
+        print r.solution
+        print ""
+        print ""
+    """
+    return 0
+
+def testQap(n = 5, i = 0):
+    taumax = 0.0000053
+    taumin = 0.000000053
+    beta = 1
+    rho = 0.02
+    total_ants = 10
+    total_generations = 100
+    instancias = parse_qap()
+    flux_mats = instancias[i][:-1]
+    dist_mat = instancias[i][-1]
+    
+    qapM3as = QapM3as(taumax, taumin, beta, rho, flux_mats, dist_mat, total_ants, total_generations)
+    pareto_set = ParetoSet(None)
+    for i in xrange(n):
+        result = qapM3as.run()
+        pareto_set.update(result.solutions)
+    pareto_front = ParetoFront(pareto_set)
+    pareto_front.draw()
+    """print "\n\nFrente Pareto"
+    for p in pareto_front.pareto_front:
+        print p
+        print ""
+    print "\n\nConjunto Pareto"    
+    for r in result.solutions:
+        print r.solution
+        print ""
+        print ""
+    """
+    return 0
+
 
 if __name__ == '__main__':
-	main()
+	testQap()
 
