@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cparser
-from objectivefunction import TSPObjectiveFunction
-from ga import GaSolution, TspGeneticOperators
+from cparser import parse_qap, parse_tsp
+from objectivefunction import TSPObjectiveFunction, QAPObjectiveFunction
+from ga import GaSolution, GeneticOperators
 from solution import ParetoSet, ParetoFront
 import random
 from cluster import Cluster
@@ -36,8 +36,6 @@ class SPEA:
             mating_pool = self.selection(P, ps)
             P = self.next_generation(mating_pool, len(P))
 
-   
-
     def fitness_assignment(self, pareto_set, population):
         for pareto_ind in pareto_set.solutions:
             count = 0
@@ -57,13 +55,12 @@ class SPEA:
             pareto_ind.fitness = 1 / suma
 
 
-    def reduce_pareto_set(self, Pp):
+    def reduce_pareto_set(self, par_set):
         c1 = None
         c2 = None
         
-        """inicializar clusters """
         lista_cluster=[]
-        for solucion in Pp.solutions:
+        for solucion in par_set.solutions:
             cluster = Cluster()
             cluster.agregar_solucion(solucion)
             lista_cluster.append(cluster)
@@ -93,12 +90,12 @@ class SPEA:
 
             lista_cluster.append(cluster)
         
-        Pp=[]
+        par_set=[]
         for cluster in lista_cluster:
             solucion = cluster.centroide()
-            Pp.append(solucion)
+            par_set.append(solucion)
             
-        return Pp 
+        return par_set 
 
     def selection(self, population, pareto_set):
         """
@@ -143,29 +140,59 @@ class SPEA:
                 Q.extend(children)
         return Q
 
-def main():
+def test_tsp(n = 5, i = 0):
+    total_ind = 10
+    total_generations = 100
+    p, q = 2, 5
+    op = GeneticOperators()
+    instancias = parse_tsp()
+    cost_mats = instancias[i]
+    objs = []
+    for cost_mat in cost_mats:
+        objs.append(TSPObjectiveFunction(cost_mat))
+    num_cities = len(objs[0].mat)
+    spea = SPEA(len(objs), op, 2)
+    pareto_set = ParetoSet(None)
+    for i in xrange(n):
+        pop = []
+        for i in xrange(total_ind):
+            sol = range(num_cities)
+            random.shuffle(sol)
+            pop.append(GaSolution(sol, objs))        
+        spea.run(pop, 100)
+        pareto_set.update(pop)
+    pareto_front = ParetoFront(pareto_set)
+    pareto_front.draw()
+    return pareto_set
 
-    tsp_parsed = cparser.parse_tsp()
-    op = TspGeneticOperators()
-    objs = [TSPObjectiveFunction(tsp_parsed[0][0]), 
-            TSPObjectiveFunction(tsp_parsed[0][1])]
-    P = []
-    n = len(objs[0].mat[0])
-    for i in xrange(20):
-        sol = range(n)
-        random.shuffle(sol)
-        P.append(GaSolution(sol, objs))
+
+def test_qap(n = 5, i = 0):
+    total_ind = 20
+    total_generations = 100
+    op = GeneticOperators()
+    instancias = parse_qap()
+    flux_mats = instancias[i][:-1]
+    dist_mat = instancias[i][-1]
+    num_loc = len(flux_mats[0]) #nro de localidades
+    objs = []
+    for cost_mat in flux_mats:
+        objs.append(QAPObjectiveFunction(dist_mat, cost_mat))
     spea = SPEA(len(objs), op, 20)
-    spea.run(P, 100)
-    ps = ParetoSet()
-    ps.update(P)
-    pf = ParetoFront(ps)
-    print "Pareto Set"
-    for s in ps.solutions:
-        print s.solution
-    print "\n\nPareto Front"
-    print pf.pareto_front
+    pareto_set = ParetoSet(None)
+    for i in xrange(n):
+        pop = []
+        for i in xrange(total_ind):
+            sol = range(num_loc)
+            random.shuffle(sol)
+            pop.append(GaSolution(sol, objs))
+        spea.run(pop, total_generations)
+        pareto_set.update(pop)
+    pareto_front = ParetoFront(pareto_set)
+    pareto_front.draw()
+    return pareto_set
 
-if __name__ == '__main__':
-	main()
 
+
+
+ #   spea = SPEA(len(objs), op, 20)
+  #  spea.run(P, 100)

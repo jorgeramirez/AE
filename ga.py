@@ -29,6 +29,19 @@ class GaSolution(Solution, object):
                 dist += math.pow(v1-v2, 2) / math.pow(u[i]-l[i], 2.0)
             i += 1
         return math.sqrt(dist)
+
+    def solutions_distance(self, other):
+        """
+        Calcula la distancia Euclidiana entre dos individuos
+        
+        @param other: el otro individuo
+        """
+        me_objs = self.evaluate()
+        other_objs = other.evaluate()
+        dist = 0.0
+        for v1, v2 in zip(me_objs, other_objs):
+            dist += math.pow(v1-v2, 2)
+        return math.sqrt(dist)
     
     def __cmp__(self, other):
         """

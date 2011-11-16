@@ -13,7 +13,7 @@ class Cluster:
         distancia =0
         for solucion1 in self.lista :
             for solucion2 in cluster2.lista :
-                distancia = distancia + solucion1.distance(solucion2)
+                distancia = distancia + solucion1.solutions_distance(solucion2)
                 cont = cont +1
                 
         return distancia/cont
@@ -43,7 +43,7 @@ class Cluster:
         for solucion1 in self.lista :
             distancia=0 
             for solucion2 in self.lista:
-                distancia = distancia + solucion1.distance(solucion2)
+                distancia = distancia + solucion1.solutions_distance(solucion2)
             if menor_distancia==-1 or distancia < menor_distancia:
                 menor_distancia = distancia
                 centroide = solucion1 
