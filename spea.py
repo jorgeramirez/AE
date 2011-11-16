@@ -73,7 +73,6 @@ class SPEA:
                 for j in range(i+1, len(lista_cluster)-1): 
                     c = lista_cluster[i]
                     distancia = c.calcular_distancia(lista_cluster[j])
-                    #if min_distancia == -1 or distancia < min_distancia:
                     if distancia < min_distancia:
                         min_distancia = distancia
                         c1 = i
