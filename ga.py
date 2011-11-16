@@ -40,6 +40,8 @@ class GaSolution(Solution, object):
         """ 
         @param other: otra solución a comparar.
         """
+        if other.__class__.__name__ == "Solution":
+            return Solution.dominates(self, other)
         #Contexto de minimización
         band = False 
         for i, obj_eval in enumerate(self.evaluation):

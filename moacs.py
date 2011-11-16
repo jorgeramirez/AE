@@ -20,7 +20,6 @@ class Moacs(Moaco):
 
 	def run(self):
 		for g in xrange(self.total_generations):
-			print g
 			for ant_number in xrange(self.total_ants):
 				ant = MOACSAnt(self.beta, ant_number, self.total_ants, self.ferom_mat, self.visib_mats, \
 					self.objectives, self.tausubzero, self.qsubzero, self.rho)
