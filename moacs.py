@@ -59,7 +59,7 @@ def main():
 	beta = 1
 	rho = 0.1
 	qsubzero = 0.9
-	tausubzero = 1 #REVISAR
+	tausubzero = 0.0000000000001 #REVISAR
 	total_ants = 10
 	total_generations = 100
 	instancias = parse_tsp()
