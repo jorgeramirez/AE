@@ -24,7 +24,7 @@ for i in xrange(10):
     sol = range(n)
     random.shuffle(sol)
     P.append(GaSolution(sol, objs))
-spea = SPEA(len(objs), op, 200)
+spea = SPEA(len(objs), op, 2)
 spea.run(P, 100)
 ps = ParetoSet()
 ps.update(P)

@@ -6,7 +6,7 @@ from objectivefunction import TSPObjectiveFunction
 from ga import GaSolution, TspGeneticOperators
 from solution import ParetoSet, ParetoFront
 import random
-
+from cluster import Cluster
 class SPEA:
     def __init__(self, num_objectives, genetic_operators, max_pareto_points, cr=1.0, mr=0.1):
         pareto_set = ParetoSet(None)
@@ -30,8 +30,8 @@ class SPEA:
                 if s in P:
                     P.remove(s)
 
-            #if len(ps.solutions) > self.max_pareto_points:
-            #    self.reduce_pareto_set(ps)
+            if len(ps.solutions) > self.max_pareto_points:
+                self.reduce_pareto_set(ps)
             self.fitness_assignment(ps, P)
             mating_pool = self.selection(P, ps)
             P = self.next_generation(mating_pool, len(P))
@@ -57,59 +57,42 @@ class SPEA:
             pareto_ind.fitness = 1 / suma
 
 
-    def reduce_pareto_set(Pp):
-       # global Pp
-        lista_clusters = []
+    def reduce_pareto_set(self, Pp):
         c1 = None
         c2 = None
         
         """inicializar clusters """
         lista_cluster=[]
-        for solucion in Pp:
+        for solucion in Pp.solutions:
             cluster = Cluster()
             cluster.agregar_solucion(solucion)
             lista_cluster.append(cluster)
             
-        while len(lista_cluster) > Max_len:  
+        while len(lista_cluster) > self.max_pareto_points:  
             """Calcular los dos clusteres mas cercanos""" 
             min_distancia = -1
             for i in range (0,len(lista_cluster)-1):
-                for j in range(i+1, len(lista_cluster)): 
-                    #Calcular la distancia entre cluster
+                for j in range(i+1, len(lista_cluster) -1): 
                     c = lista_cluster[i]
                     distancia = c.calcular_distancia(lista_cluster[j])
                     if min_distancia == -1 or distancia < min_distancia:
                         min_distancia = distancia
-                        #posiciones de los clusters mas cercanos
                         c1 = i
                         c2 = j
-            
-            """Generar un nuevo cluster a partir de los dos clusters mas cercanos"""
-            print "lista_cluster: "
+
             cont =-1
             for solucion in lista_cluster:
                 cont = cont +1
-                print "cluster: "+ str(cont)
-                for l in solucion.lista:
-                    print "x: "+str(l.x) +" y: "+ str(l.y)
-                
+               
             print "unir: "+ str(c1) + " con " + str(c2) + " distancia: "+ str(min_distancia)
             print "\n\n"
             cluster = lista_cluster[c1].unir(lista_cluster[c2]) #retorna un nuevo cluster 
-            #Borramos los clusteres de las posiciones c1 y c2
-            #esta eliminacion funciona correctamente porque c1 es siempre menor a c2
-            #print "c1: "+ str(c1)
-            #print "c2: " + str(c2)
+
             del lista_cluster[c2]
             del lista_cluster[c1]
-            
-            #Agregamos el nuevo cluster c1 union c2
+
             lista_cluster.append(cluster)
         
-        
-        """Computar el conjunto nodominado reducido seleccionando de cada cluster el punto con dis-
-            tancia mínima a todos los otros puntos en el cluster considerado.
-        """
         Pp=[]
         for cluster in lista_cluster:
             solucion = cluster.centroide()
