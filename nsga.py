@@ -220,6 +220,7 @@ def test_tsp(n = 5, i = 0):
         pareto_set.update(pop)
     pareto_front = ParetoFront(pareto_set)
     pareto_front.draw()
+    return pareto_set
 
 
 def test_qap(n = 5, i = 0):
@@ -246,3 +247,4 @@ def test_qap(n = 5, i = 0):
         pareto_set.update(pop)
     pareto_front = ParetoFront(pareto_set)
     pareto_front.draw()
+    return pareto_set

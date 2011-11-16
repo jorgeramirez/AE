@@ -27,7 +27,7 @@ def test_tsp():
     pf = ParetoFront(ps)
     draw(P, pf)
     '''
-    nsga.test_tsp()
+    return nsga.test_tsp()
     
 
     
@@ -77,7 +77,7 @@ def test_qap():
     pf = ParetoFront(ps)
     draw(P, pf)
     '''
-    nsga.test_qap()
+    return nsga.test_qap()
 
 def usage():
     print "Usage: python test_nsga.py [tsp | qap]"
