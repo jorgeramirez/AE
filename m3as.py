@@ -28,7 +28,7 @@ class M3as(Moaco):
                 self.pareto_set.update([solution])
             self.evaporate_feromones()
             self.update_feromones()
-            print g
+            #print g
         return self.pareto_set
 				
     def evaporate_feromones(self):

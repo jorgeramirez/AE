@@ -42,18 +42,21 @@ class DistributionMetric(Metric):
             for p2 in pareto_front.pareto_front:
                 if p1 != p2 and self.distance(p1, p2) > self.sigma:
                     suma = suma + 1
-                    
-        return suma/(len(pareto_front.pareto_front) - 1)
+        if len(pareto_front.pareto_front) - 1 > 0:             
+            result = suma/(len(pareto_front.pareto_front) - 1)
+        else:
+            result = suma
+        return result
     
 class ExtensionMetric(Metric):
     def evaluate(self, pareto_front):
         dist_x = []
         dist_y = []
-        n = len(pareto_front.paret_front)
+        n = len(pareto_front.pareto_front)
         pareto = pareto_front.pareto_front
         for i in range(n - 1):
             for j in range(i + 1, n):
-                ext_x.append(math.pow((pareto[i][0] - pareto[j][0]), 2))
-                ext_y.append(math.pow((pareto[i][1] - pareto[j][1]), 2))
+                dist_x.append(math.pow((pareto[i][0] - pareto[j][0]), 2))
+                dist_y.append(math.pow((pareto[i][1] - pareto[j][1]), 2))
             
         return math.sqrt(max(dist_x) + max(dist_y))
