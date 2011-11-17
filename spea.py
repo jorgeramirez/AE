@@ -53,7 +53,7 @@ class SPEA:
                 if pareto_ind.dominates(population_ind):
                     suma = suma + 1.0/pareto_ind.fitness
             suma = suma + 1.0
-            pareto_ind.fitness = 1 / suma
+            population_ind.fitness = 1 / suma
 
 
     def reduce_pareto_set(self, par_set):
