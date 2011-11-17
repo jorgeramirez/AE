@@ -53,7 +53,7 @@ class QAPObjectiveFunction(ObjectiveFunction):
         path = solution.solution
         path_cost = 0
         for i in xrange(len(path)):
-            for j in xrange(i, len(path)):
+            for j in xrange(len(path)):
                     distance = self.dist_mat[i][j]
                     flux = self.flux_mat[path[i]][path[j]]
                     path_cost = path_cost + distance * flux
