@@ -1,5 +1,6 @@
 #coding: UTF-8
 from ga import GaSolution
+import sys
 class Cluster:
     
     def __init__(self):
@@ -34,19 +35,17 @@ class Cluster:
         return cluster_nuevo
     
     def centroide(self):
-        menor_distancia = -1
+        menor_distancia = sys.maxint
         centroide = None
         if len(self.lista)==1:
             centroide = self.lista[0]
-            return centroide
-        
-        for solucion1 in self.lista :
-            distancia=0 
-            for solucion2 in self.lista:
-                distancia = distancia + solucion1.solutions_distance(solucion2)
-            if menor_distancia==-1 or distancia < menor_distancia:
-                menor_distancia = distancia
-                centroide = solucion1 
-            
+        else:
+            for solucion1 in self.lista :
+                distancia=0 
+                for solucion2 in self.lista:
+                    distancia = distancia + solucion1.solutions_distance(solucion2)
+                if distancia < menor_distancia:
+                    menor_distancia = distancia
+                    centroide = solucion1
         return centroide
         

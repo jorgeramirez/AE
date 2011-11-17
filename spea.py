@@ -67,7 +67,6 @@ class SPEA:
             lista_cluster.append(cluster)
   
         while len(lista_cluster) > self.max_pareto_points:
-            print len(lista_cluster)
             min_distancia = sys.maxint
             for i in range (0,len(lista_cluster)-1):
                 for j in range(i+1, len(lista_cluster)-1): 
